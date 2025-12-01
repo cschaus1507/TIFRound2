@@ -63,6 +63,25 @@
       <p id="score-text" class="score-text"></p>
       <button onclick="location.reload()">Play Again</button>
     </div>
+
+    <!-- AI Scenario Builder -->
+    <div id="ai-builder" class="card fade-in">
+      <h2>AI Scenario Builder</h2>
+      <p class="small">
+        Type a theme (for example: <em>medical bills</em>, <em>rent</em>, <em>transportation</em>, 
+        <em>school supplies</em>) and the AI helper will generate a new poverty-related scenario 
+        with three choices. Use it for discussion, writing, or to extend the game.
+      </p>
+      <input
+        id="ai-theme"
+        type="text"
+        class="builder-input"
+        placeholder="e.g., medical bills, rent, transportation, school supplies"
+      />
+      <button onclick="generateAIScenario()">Generate Scenario</button>
+      <div id="ai-output" class="ai-output"></div>
+    </div>
+
   </section>
 
   <footer>
