@@ -40,8 +40,45 @@ const events = [
   }
 ];
 
+const totalEvents = events.length;
+
+function playSound(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  try {
+    el.currentTime = 0;
+    el.play();
+  } catch (e) {
+    // ignore autoplay errors
+  }
+}
+
+function updateStatusBar() {
+  const moneyDisplay = document.getElementById("money-display");
+  const stabilityDisplay = document.getElementById("stability-display");
+  const progressText = document.getElementById("progress-text");
+  const progressFill = document.getElementById("progress-fill");
+
+  moneyDisplay.textContent = `$${money}`;
+  stabilityDisplay.textContent = stability;
+
+  const completed = Math.min(currentEvent, totalEvents);
+  progressText.textContent = `${completed} / ${totalEvents}`;
+  const percent = (completed / totalEvents) * 100;
+  progressFill.style.width = `${percent}%`;
+
+  // Color money red if negative
+  if (money < 0) {
+    moneyDisplay.style.color = "#e53e3e";
+  } else {
+    moneyDisplay.style.color = "#222";
+  }
+}
+
 function startGame() {
   document.getElementById("intro").classList.add("hidden");
+  playSound("click-sound");
+  updateStatusBar();
   nextEvent();
 }
 
@@ -49,6 +86,8 @@ function nextEvent() {
   if (currentEvent >= events.length) return endGame();
 
   const ev = events[currentEvent];
+  const eventCard = document.getElementById("event");
+
   document.getElementById("event-title").innerText = ev.title;
   document.getElementById("event-description").innerText = ev.description;
 
@@ -59,18 +98,43 @@ function nextEvent() {
     const btn = document.createElement("button");
     btn.className = "choice-btn";
     btn.innerText = choice.text;
-    btn.onclick = () => selectChoice(choice);
+    btn.onclick = () => selectChoice(choice, eventCard);
     choicesDiv.appendChild(btn);
   });
 
-  document.getElementById("event").classList.remove("hidden");
+  eventCard.classList.remove("hidden");
+  eventCard.classList.remove("flash-green", "flash-red");
+  eventCard.classList.add("fade-in");
+
+  updateStatusBar();
 }
 
-function selectChoice(choice) {
-  money += choice.money;
-  stability += choice.stability;
+function selectChoice(choice, cardElement) {
+  // Determine if choice is generally positive or negative for animation
+  const moneyDelta = choice.money;
+  const stabilityDelta = choice.stability;
+
+  money += moneyDelta;
+  stability += stabilityDelta;
   currentEvent++;
-  nextEvent();
+
+  // Simple “is this probably good?” heuristic: higher stability tends to be good
+  if (stabilityDelta >= 0) {
+    cardElement.classList.remove("flash-red");
+    cardElement.classList.add("flash-green");
+    playSound("click-sound");
+  } else {
+    cardElement.classList.remove("flash-green");
+    cardElement.classList.add("flash-red");
+    playSound("click-sound");
+  }
+
+  updateStatusBar();
+
+  // Move to next event after brief delay so animation is visible
+  setTimeout(() => {
+    nextEvent();
+  }, 450);
 }
 
 function endGame() {
@@ -86,11 +150,44 @@ function endGame() {
   } else if (stability < 3) {
     result += "You survived, but instability made the month stressful.";
   } else {
-    result += "You achieved stability — showing how support systems matter!";
+    result += "You achieved relative stability — showing how support systems and planning matter!";
   }
 
-  result += `<br><br>This relates to <strong>SDG #1: No Poverty</strong> because the choices people make are shaped by access, opportunity, and support systems — not just effort.`;
+  result += `<br><br>This relates to <strong>SDG #1: No Poverty</strong> because the choices people make are shaped by income, access to services, and community support — not just effort or “good” decisions.`;
+
+  // Scoring system
+  const score = calculateScore(money, stability);
+  const rating = getRating(score);
+
+  const scoreText = `Final Score: <strong>${score}</strong> – Rating: <strong>${rating}</strong>`;
+
+  if (rating === "Gold") {
+    playSound("success-sound");
+  } else if (rating === "Bronze") {
+    playSound("fail-sound");
+  } else {
+    playSound("click-sound");
+  }
 
   document.getElementById("summary-text").innerHTML = result;
+  document.getElementById("score-text").innerHTML = scoreText;
   document.getElementById("summary").classList.remove("hidden");
 }
+
+function calculateScore(money, stability) {
+  // Simple scoring: stability is weighted more heavily
+  // money (clamped) + stability * 100
+  const clampedMoney = Math.max(money, -500); // don’t let negative spiral too far
+  return Math.round(clampedMoney + stability * 100);
+}
+
+function getRating(score) {
+  if (score >= 600) return "Gold";
+  if (score >= 350) return "Silver";
+  if (score >= 150) return "Bronze";
+  return "Needs Support";
+}
+
+// Initialize HUD on first load
+document.addEventListener("DOMContentLoaded", updateStatusBar);
+
