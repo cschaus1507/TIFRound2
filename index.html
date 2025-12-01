@@ -13,21 +13,54 @@
   </header>
 
   <section id="game">
-    <div id="intro" class="card">
+
+    <!-- Status / HUD -->
+    <div id="status-bar" class="card">
+      <div class="status-row">
+        <div>
+          <span class="label">Money:</span>
+          <span id="money-display">$1200</span>
+        </div>
+        <div>
+          <span class="label">Stability:</span>
+          <span id="stability-display">0</span>
+        </div>
+      </div>
+      <div class="status-row">
+        <div class="progress-wrapper">
+          <span class="label">Progress:</span>
+          <span id="progress-text">0 / 4</span>
+          <div class="progress-bar">
+            <div id="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intro Card -->
+    <div id="intro" class="card fade-in">
       <h2>Welcome, Player!</h2>
       <p>You have <strong>$1200</strong> to survive one month. Make smart choices, plan ahead, and discover how poverty affects real people.</p>
+      <p class="small">
+        Goal: Finish the month with money left and higher stability. 
+        Each choice changes your money and your “stability” score.
+      </p>
       <button onclick="startGame()">Start Game</button>
     </div>
 
-    <div id="event" class="card hidden">
+    <!-- Event Card -->
+    <div id="event" class="card hidden fade-in">
       <h2 id="event-title"></h2>
       <p id="event-description"></p>
       <div id="choices"></div>
+      <p class="hint">Tip: Think about long-term impact, not just the cheapest option.</p>
     </div>
 
-    <div id="summary" class="card hidden">
+    <!-- Summary Card -->
+    <div id="summary" class="card hidden fade-in">
       <h2>Game Summary</h2>
       <p id="summary-text"></p>
+      <p id="score-text" class="score-text"></p>
       <button onclick="location.reload()">Play Again</button>
     </div>
   </section>
@@ -35,6 +68,11 @@
   <footer>
     <p>Created with AI Support • SDG #1: No Poverty</p>
   </footer>
+
+  <!-- Optional sounds (add these files in a /sounds folder or change the src) -->
+  <audio id="click-sound" src="sounds/click.mp3" preload="auto"></audio>
+  <audio id="success-sound" src="sounds/success.mp3" preload="auto"></audio>
+  <audio id="fail-sound" src="sounds/fail.mp3" preload="auto"></audio>
 
   <script src="script.js"></script>
 </body>
