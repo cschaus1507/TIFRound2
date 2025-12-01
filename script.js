@@ -110,7 +110,6 @@ function nextEvent() {
 }
 
 function selectChoice(choice, cardElement) {
-  // Determine if choice is generally positive or negative for animation
   const moneyDelta = choice.money;
   const stabilityDelta = choice.stability;
 
@@ -118,7 +117,6 @@ function selectChoice(choice, cardElement) {
   stability += stabilityDelta;
   currentEvent++;
 
-  // Simple “is this probably good?” heuristic: higher stability tends to be good
   if (stabilityDelta >= 0) {
     cardElement.classList.remove("flash-red");
     cardElement.classList.add("flash-green");
@@ -131,7 +129,6 @@ function selectChoice(choice, cardElement) {
 
   updateStatusBar();
 
-  // Move to next event after brief delay so animation is visible
   setTimeout(() => {
     nextEvent();
   }, 450);
@@ -155,7 +152,6 @@ function endGame() {
 
   result += `<br><br>This relates to <strong>SDG #1: No Poverty</strong> because the choices people make are shaped by income, access to services, and community support — not just effort or “good” decisions.`;
 
-  // Scoring system
   const score = calculateScore(money, stability);
   const rating = getRating(score);
 
@@ -163,7 +159,7 @@ function endGame() {
 
   if (rating === "Gold") {
     playSound("success-sound");
-  } else if (rating === "Bronze") {
+  } else if (rating === "Bronze" || rating === "Needs Support") {
     playSound("fail-sound");
   } else {
     playSound("click-sound");
@@ -175,9 +171,7 @@ function endGame() {
 }
 
 function calculateScore(money, stability) {
-  // Simple scoring: stability is weighted more heavily
-  // money (clamped) + stability * 100
-  const clampedMoney = Math.max(money, -500); // don’t let negative spiral too far
+  const clampedMoney = Math.max(money, -500);
   return Math.round(clampedMoney + stability * 100);
 }
 
@@ -190,4 +184,77 @@ function getRating(score) {
 
 // Initialize HUD on first load
 document.addEventListener("DOMContentLoaded", updateStatusBar);
+
+/* ---------- AI Scenario Builder ---------- */
+
+function generateAIScenario() {
+  const input = document.getElementById("ai-theme");
+  const output = document.getElementById("ai-output");
+  const themeRaw = input.value.trim();
+
+  if (!themeRaw) {
+    output.innerHTML = `<p>Please enter a theme first, like <em>medical bills</em>, <em>rent</em>, or <em>transportation</em>.</p>`;
+    return;
+  }
+
+  const theme = themeRaw[0].toUpperCase() + themeRaw.slice(1);
+  const themeLower = themeRaw.toLowerCase();
+
+  // Simple variation so it feels "AI-ish"
+  const titleOptions = [
+    `${theme} Crisis`,
+    `${theme} Dilemma`,
+    `Hard Choices about ${theme}`,
+    `A Month of ${theme}`
+  ];
+  const descOptions = [
+    `This month, ${themeLower} becomes a major issue for your household. Your budget is already tight, and now you have to decide what to do.`,
+    `You can’t avoid dealing with ${themeLower} any longer. Each choice affects both your money and your long-term stability.`,
+    `Because of ${themeLower}, you have to make trade-offs between today’s needs and tomorrow’s security.`
+  ];
+
+  const title = titleOptions[Math.floor(Math.random() * titleOptions.length)];
+  const description = descOptions[Math.floor(Math.random() * descOptions.length)];
+
+  // Three choice templates (money, stability)
+  const choices = [
+    {
+      text: `Pay extra now to get a more stable, long-term solution for ${themeLower}.`,
+      money: -250,
+      stability: +3
+    },
+    {
+      text: `Choose the cheapest short-term fix for ${themeLower}, even if it might cause problems later.`,
+      money: -80,
+      stability: -1
+    },
+    {
+      text: `Look for help from a community program, charity, or government support related to ${themeLower}.`,
+      money: 0,
+      stability: +2
+    }
+  ];
+
+  // Render result for teacher/student to use
+  let html = `
+    <span class="ai-tag">AI-Generated Scenario</span>
+    <h3>${title}</h3>
+    <p>${description}</p>
+    <strong>Choices:</strong>
+    <ul>
+      ${choices.map(c => `
+        <li>
+          ${c.text}
+          <br><span class="small">Money: ${c.money >= 0 ? "+" : ""}$${c.money} | Stability: ${c.stability >= 0 ? "+" : ""}${c.stability}</span>
+        </li>
+      `).join("")}
+    </ul>
+    <p class="small">
+      Tip: You can use this as a discussion prompt, a writing task, 
+      or even add it as a new event in a future version of the game.
+    </p>
+  `;
+
+  output.innerHTML = html;
+}
 
