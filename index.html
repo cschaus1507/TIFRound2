@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Budget Quest – SDG #1: No Poverty Game</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header>
+    <h1>💰 Budget Quest</h1>
+    <p class="subtitle">An SDG #1 Game – No Poverty</p>
+  </header>
+
+  <section id="game">
+    <div id="intro" class="card">
+      <h2>Welcome, Player!</h2>
+      <p>You have <strong>$1200</strong> to survive one month. Make smart choices, plan ahead, and discover how poverty affects real people.</p>
+      <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="event" class="card hidden">
+      <h2 id="event-title"></h2>
+      <p id="event-description"></p>
+      <div id="choices"></div>
+    </div>
+
+    <div id="summary" class="card hidden">
+      <h2>Game Summary</h2>
+      <p id="summary-text"></p>
+      <button onclick="location.reload()">Play Again</button>
+    </div>
+  </section>
+
+  <footer>
+    <p>Created with AI Support • SDG #1: No Poverty</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
